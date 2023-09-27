@@ -1,0 +1,30 @@
+{% extends 'tic/base.html' %}
+{% block title %}
+   {{RegisterUser}}
+{% endblock %}
+
+{% block content %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    {% for ticket in tickets %}
+    <div class="column card">
+        <div class="dev">
+            <a href="{% url 'ticketThis' ticket.id %}" class="card__body">
+                <div class="dev__ticket">
+                    <div class="dev__meta">
+                        <h3>Название задачи: {{ ticket.subject }}</a></h3>
+                        <p>Статус задачи: {{ ticket.kind }}</p>
+                        <p>Описание задачи: {{ ticket.body }}</p>
+                        <p>Автор задачи: {{ ticket.author.user }}</p>
+                    </div>
+                </div> 
+        </div>
+    </div>
+    {% endfor %}
+
+</body>
+{% endblock %}

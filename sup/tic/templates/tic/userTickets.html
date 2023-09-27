@@ -1,0 +1,37 @@
+{% extends 'tic/base.html' %}
+{% block title %}
+   {{userTickets}}
+{% endblock %}
+
+{% block content %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyTickets </title>
+    <a class="ticket__author" href="{% url 'userProfile' profile.slug %}">Автор:
+        {{ profile.name }}</a>
+</head>
+<body>
+    {% for ticket in tickets %}
+    <div class="column card">
+        <div class="dev">
+            <a href="{% url 'ticketThis' ticket.id %}" class="card__body">
+                <div class="dev__ticket">
+                    <div class="dev__meta">
+                    <h3>Тема задачи: {{ ticket.subject }}</a></h3>
+                    <p>Описание задачи: {{ ticket.body }}</p>
+                    <p>Статус задачи: {{ ticket.kind }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+        <div class="devInfo">
+            <button class="btn btn-outline-info" type="submit"><a class="ml-2" href="{% url 'userProfile' profile.slug%}">Мой профиль</a></button>
+            <button class="btn btn-outline-info" type="submit"><a class="ml-2" href="{% url 'logoutUser' %}">Выйти</a></button>
+        </div>
+        
+</body>
+{% endblock %}
