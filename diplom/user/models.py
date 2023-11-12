@@ -28,7 +28,7 @@ class User(AbstractUser):
 class Profile(models.Model):
     ROLE_CHOICES = (
         ('Пользователь', 'Пользователь'),
-        ('Админ', 'Админ'),
+        ('Администратор', 'Администратор'),
         ('Аниматор', 'Аниматор')
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)

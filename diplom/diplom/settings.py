@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'user',
     'rest_framework_swagger',
-    'drf_spectacular'
+    'drf_spectacular',
+    'personage',
 ]
 
 MIDDLEWARE = [

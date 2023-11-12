@@ -9,7 +9,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from django.contrib.auth import authenticate, login, logout
-from .permissions import IsOnlyMyProfile
+from .permissions import IsOnlyMyProfile, IsOnlyAdministratorOrAnimators
 
 
 
@@ -111,7 +111,7 @@ class ProfileUpdate(generics.UpdateAPIView):    #функция для изме�
 class ProfileUpdateForAnimatorsOrAdministrator(generics.UpdateAPIView):    
     queryset = Profile.objects.all()                           
     serializer_class = ProfileUpdateSerializerForAnimators
-    permission_classes=[IsAuthenticated, IsOnlyMyProfile]
+    permission_classes=[IsAuthenticated, IsOnlyMyProfile, IsOnlyAdministratorOrAnimators]
     @extend_schema(
         request = ProfileUpdateSerializerForAnimators,
         responses = {
@@ -128,9 +128,11 @@ class ProfileUpdateForAnimatorsOrAdministrator(generics.UpdateAPIView):
         serializer.save()
         return Response (serializer.data)
     
-class ProfileDelete(generics.DestroyAPIView): 
+class ProfileDelete(generics.RetrieveDestroyAPIView): 
+    queryset = Profile.objects.all()                           
+    serializer_class = ProfileSerializer
     permission_classes=[IsAuthenticated, IsOnlyMyProfile]   
-    def delete_user(self, request, pk):
+    def delete_profile(self, request, pk):
         user = User.objects.filter(pk=pk)
 
         user.delete()
