@@ -111,7 +111,7 @@ class ProfileUpdate(generics.UpdateAPIView):    #функция для изме�
 class ProfileUpdateForAnimatorsOrAdministrator(generics.UpdateAPIView):    
     queryset = Profile.objects.all()                           
     serializer_class = ProfileUpdateSerializerForAnimators
-    permission_classes=[IsAuthenticated, IsOnlyMyProfile, IsOnlyAdministratorOrAnimators]
+    permission_classes=[IsAuthenticated, IsOnlyMyProfile, IsOnlyAdministratorOrAnimators ]
     @extend_schema(
         request = ProfileUpdateSerializerForAnimators,
         responses = {

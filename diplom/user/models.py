@@ -42,6 +42,8 @@ class Profile(models.Model):
     tiktok = models.CharField(max_length=100, blank=True, null=True)
     instagram = models.CharField(max_length=100, blank=True, null=True)
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=True)
+    my_likes = models.ManyToManyField('personage.Personage', symmetrical = False, blank=True, related_name ='who_liked')
+
     objects = UserManager()
 
     def __str__(self):

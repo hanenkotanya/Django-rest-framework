@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import PersonageCreateView, PersonageListView, PersonageOneListView, PersonageOneUpdateView, PersonageDeleteView, PersonafeListFor1_4_yearsView, PersonafeListFor5_9_yearsView, PersonafeListFor9_14_yearsView
-
+from .views import PersonageCreateView, PersonageListView, PersonageOneListView, PersonageOneUpdateView, PersonageOneLikeDeleteView
+from .views import PersonageOneLikeView, PersonageDeleteView, PersonafeListFor1_4_yearsView, PersonafeListFor5_9_yearsView, PersonafeListFor9_14_yearsView
 
 
 urlpatterns = [
@@ -10,8 +10,10 @@ urlpatterns = [
     path('personage_list_for5_9_years/', PersonafeListFor5_9_yearsView.as_view()),
     path('personage_list_for9_14_years/', PersonafeListFor9_14_yearsView.as_view()),
     path('personage_one/<int:pk>/', PersonageOneListView.as_view()),
+    path('personage_one/<int:pk>/like/', PersonageOneLikeView.as_view()),
+    path('personage_one/<int:pk>/like_delete/', PersonageOneLikeDeleteView.as_view()),
     path('personage_one_update/<int:pk>/', PersonageOneUpdateView.as_view()),
     path('personage_one_delete/<int:pk>/', PersonageDeleteView.as_view()),
 
 
-]
+] 

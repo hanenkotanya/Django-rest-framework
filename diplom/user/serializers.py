@@ -46,7 +46,13 @@ class UserSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['id', 'user', 'image', 'email', 'role', 'intro', 'username']
+        fields = ['id', 'user', 'image', 'email', 'role', 'intro', 'username', 'my_likes']
+
+
+class ProfileLikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['my_likes']
 
 
 class ProfileUpdateSerializerForUser(serializers.ModelSerializer):

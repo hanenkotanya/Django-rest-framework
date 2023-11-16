@@ -654,3 +654,94 @@ class PersonafeListFor5_9_yearsView(generics.ListAPIView):
     path('personage_list_for1_4_years/', PersonafeListFor1_4_yearsView.as_view()),
     path('personage_list_for5_9_years/', PersonafeListFor5_9_yearsView.as_view()),
     path('personage_list_for9_14_years/', PersonafeListFor9_14_yearsView.as_view()),
+
+
+3 commit
+
+В модель Profile добавили поле
+
+my_likes = models.ManyToManyField('personage.Personage', symmetrical = False, blank=True, related_name ='who_liked')
+
+Провели миграции
+
+personage.serializers.py
+
+from user.models import Profile
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['my_likes']
+        extra_kwargs = {
+            'my_likes': {'read_only': True},
+        }
+
+personage.views.py
+
+from .serializers import ..., LikeSerializer
+
+class PersonageOneLikeView(generics.RetrieveUpdateAPIView):
+    queryset = Personage.objects.all()
+    serializer_class = LikeSerializer
+    permission_classes = [IsAuthenticated, ]
+    def update(self, request, pk):
+        profile = request.user.profile
+        personage = Personage.objects.get(pk=pk)
+        profile.my_likes.add(personage.id)
+        serializer_data = request.data.get(profile)
+        serializer = self.serializer_class(data=serializer_data, partial=True)
+        serializer.is_valid(raise_exception =True)
+        serializer.save()
+        return Response (serializer.data)
+    
+
+class PersonageOneLikeDeleteView(generics.RetrieveUpdateAPIView):
+    queryset = Personage.objects.all()
+    serializer_class = LikeSerializer
+    permission_classes = [IsAuthenticated, ]
+    def update(self, request, pk):
+        profile = request.user.profile
+        personage = Personage.objects.get(pk=pk)
+        profile.my_likes.remove(personage.id)
+        serializer_data = request.data.get(profile)
+        serializer = self.serializer_class(data=serializer_data, partial=True)
+        serializer.is_valid(raise_exception =True)
+        serializer.save()
+        return Response (serializer.data)
+
+
+
+class PersonageLikeListView(generics.ListAPIView):
+    queryset = Personage.objects.filter(activity = True)
+    serializer_class = PersonageSerializer
+    permission_classes = [IsAuthenticated, ]
+    def get(self, request):
+        profile = request.user.profile
+        my_likes =  profile.my_likes.filter(activity = True)
+        serializer = PersonageSerializer(my_likes, many=True)
+        return Response(serializer.data)
+    
+
+personage.urls.py
+
+from .views import PersonageOneLikeView, PersonageOneLikeDeleteView
+
+urlpatterns = [
+    ...
+    path('personage_one/<int:pk>/like/', PersonageOneLikeView.as_view()),
+    path('personage_one/<int:pk>/like_delete/', PersonageOneLikeDeleteView.as_view()),
+    ...
+]
+
+
+user.urls.py
+
+from personage.views import PersonageLikeListView
+
+urlpatterns = [
+    ...
+    path('my_likes/', PersonageLikeListView.as_view()),
+    ...
+]
+
+
