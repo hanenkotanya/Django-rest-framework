@@ -32,9 +32,8 @@ class Profile(models.Model):
         ('Аниматор', 'Аниматор')
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    username = models.CharField(max_length=50, blank=True, null=True)
+    name = models.CharField(max_length=50, blank=True, null=True)
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='Пользователь')
-    email = models.EmailField(max_length=100, blank=True, null=True, unique=True)
     intro = models.CharField(max_length=500, blank=True, null=True, verbose_name='Описание')
     image = models.ImageField(blank=True, null=True,
                               default='profile_images/default.jpg',

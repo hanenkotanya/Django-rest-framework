@@ -7,12 +7,13 @@ class PersonageSerializer(serializers.ModelSerializer):
     creator = serializers.ReadOnlyField(source='creator.email')
     class Meta:
         model = Personage
-        fields = ['id', 'creator', 'name', 'description', 'image', 'activity', 'life_size_puppet', 'animators_1_4_years', 'animators_5_9_years', 'animators_9_14_years', ]
+        fields = ['id', 'creator', 'name', 'description', 'image', 'activity', 'life_size_puppet', ]
         extra_kwargs = {
             'id': {'read_only': True},
             'creator': {'read_only': True},
             'activity': {'read_only': True},
             'life_size_puppet' : {'read_only': True},
+
         }
 
 

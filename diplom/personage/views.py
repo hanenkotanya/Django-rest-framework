@@ -10,19 +10,19 @@ from rest_framework.response import Response
 from django.http import response
 from .permissions import IsOnlyAdministrator
 
-        
-@extend_schema(
+
+
+class PersonageCreateView(generics.CreateAPIView):
+    queryset = Personage.objects.all()
+    serializer_class = PersonageSerializer
+    permission_classes = [IsAuthenticated ]
+    @extend_schema(
         request = PersonageSerializer,
         responses = {
             "201": Personage,
             "404": "Bad request"
         }
     )
-
-class PersonageCreateView(generics.CreateAPIView):
-    queryset = Personage.objects.all()
-    serializer_class = PersonageSerializer
-    permission_classes = [IsAuthenticated ]
     def perform_create(self, serializer):
         profile = Profile.objects.get(user = self.request.user)
         if profile.role == "Администратор":
@@ -46,7 +46,7 @@ class PersonageOneListView(generics.RetrieveAPIView):
     serializer_class = PersonageSerializer
     permission_classes = [AllowAny, ]
     def get(self, request, pk):
-        personage = Personage.objects.filter(pk=pk)
+        personage = Personage.objects.filter(pk=pk, activity = True)
         serializer = PersonageSerializer(personage, many=True)
         return Response(serializer.data)
         
@@ -55,6 +55,13 @@ class PersonageOneUpdateView(generics.RetrieveUpdateAPIView):
     queryset = Personage.objects.all()
     serializer_class = PersonageUpdateSerializerForAdministrator
     permission_classes = [IsAuthenticated, IsOnlyAdministrator ]
+    @extend_schema(
+        request = PersonageUpdateSerializerForAdministrator,
+        responses = {
+            "201": Personage,
+            "404": "Bad request"
+        }
+    )
     def update_personage(self, request, pk):
         personage = Personage.objects.filter(pk=pk) 
         serializer_data = request.data.get(personage)
@@ -118,33 +125,7 @@ class PersonageDeleteView(generics.RetrieveDestroyAPIView):
             'message': 'Успешно'
         }
         return response
-
     
-class PersonafeListFor1_4_yearsView(generics.ListAPIView):
-    queryset = Personage.objects.filter(activity = True, animators_1_4_years = True)
-    serializer_class = PersonageSerializer
-    permission_classes = [AllowAny, ]
-    def get(self, request):
-        personage = Personage.objects.filter(activity = True, animators_1_4_years = True)  
-        serializer = PersonageSerializer(personage, many=True)
-        return Response(serializer.data)
     
 
-class PersonafeListFor9_14_yearsView(generics.ListAPIView):
-    queryset = Personage.objects.filter(activity = True, animators_9_14_years = True)
-    serializer_class = PersonageSerializer
-    permission_classes = [AllowAny, ]
-    def get(self, request):
-        personage = Personage.objects.filter(activity = True, animators_9_14_years = True)  
-        serializer = PersonageSerializer(personage, many=True)
-        return Response(serializer.data)
-    
 
-class PersonafeListFor5_9_yearsView(generics.ListAPIView):
-    queryset = Personage.objects.filter(activity = True, animators_5_9_years = True)
-    serializer_class = PersonageSerializer
-    permission_classes = [AllowAny, ]
-    def get(self, request):
-        personage = Personage.objects.filter(activity = True, animators_5_9_years = True)  
-        serializer = PersonageSerializer(personage, many=True)
-        return Response(serializer.data)

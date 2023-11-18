@@ -4,24 +4,21 @@ from .models import Profile
 from django.conf import settings
 
 
+
 def createProfile(sender, instance, created, **kwargs):
     if created:
         user = instance
         profile = Profile.objects.create(
             user=user,
-            email=user.email,
-            username = user.username
+            name = user.username
 
         )
 
-
 def updateProfile(sender, instance, created, **kwargs):
-    profile = instance
-    user = profile.user
-
-    if created == True:
-        user.email = profile.email
-        user.save()
+    user = instance.user
+    profile = Profile.objects.get(user=user)
+    user.username = profile.name 
+    user.save()
 
 
 def deleteUser(sender, instance, **kwargs):
@@ -32,6 +29,6 @@ def deleteUser(sender, instance, **kwargs):
         pass
 
 
-post_save.connect(createProfile, sender=User)
-post_save.connect(updateProfile, sender=Profile)
-post_delete.connect(deleteUser, sender=Profile)
+post_save.connect(createProfile, weak=False, sender=User)
+post_save.connect(updateProfile, weak=False, sender=Profile)
+post_delete.connect(deleteUser, weak=False, sender=Profile)

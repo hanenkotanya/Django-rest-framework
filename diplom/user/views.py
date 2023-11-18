@@ -12,34 +12,38 @@ from django.contrib.auth import authenticate, login, logout
 from .permissions import IsOnlyMyProfile, IsOnlyAdministratorOrAnimators
 
 
-
-@extend_schema(
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.AllowAny]
+    @extend_schema(
         request = UserSerializer,
         responses = {
             "201": UserSerializer,
             "404": "Bad request"
         }
     )
-class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [permissions.AllowAny]
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
  
 
 
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
     permission_classes = [permissions.AllowAny]
-
+    @extend_schema(
+        request = LoginSerializer,
+        responses = {
+            "201": LoginSerializer,
+            "404": "Bad request"
+        }
+    )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         email = serializer.validated_data.get('email')
         password = serializer.validated_data.get('password')
-
         user = authenticate(request, email=email, password=password)
-
         if user is not None:
             login(request, user)
             return Response({'message': 'login successful'}, status=status.HTTP_200_OK)
@@ -61,15 +65,6 @@ class UserView(generics.ListAPIView):
         user = request.user
         serializer = UserSerializer(user)
         return Response(serializer.data)
-
- 
-    def update_profile(self, request, *args, **kwargs):
-        user = request.user
-        serializer_data = request.data.get(user)
-        serializer = self.serializer_class(data=serializer_data, partial=True)
-        serializer.is_valid(raise_exception =True)
-        serializer.save()
-        return Response (serializer.data)
     
 
 class ProfileView(generics.ListAPIView):    #профиль активного юзера
@@ -100,8 +95,7 @@ class ProfileUpdate(generics.UpdateAPIView):    #функция для изме�
         }
     ) 
     def update_profile(self, request, pk, *args, **kwargs):
-        user = User.objects.filter(pk=pk) 
-        profile = Profile.object.filter(user=user)
+        profile = Profile.object.filter(pk=pk)
         serializer_data = request.data.get(profile)
         serializer = self.serializer_class(data=serializer_data, partial=True)
         serializer.is_valid(raise_exception =True)
@@ -120,8 +114,7 @@ class ProfileUpdateForAnimatorsOrAdministrator(generics.UpdateAPIView):
         }
     ) 
     def update_profile(self, request, pk, *args, **kwargs):
-        user = User.objects.filter(pk=pk) 
-        profile = Profile.object.filter(user=user)
+        profile = Profile.object.filter(pk=pk)
         serializer_data = request.data.get(profile)
         serializer = self.serializer_class(data=serializer_data, partial=True)
         serializer.is_valid(raise_exception =True)
@@ -133,9 +126,8 @@ class ProfileDelete(generics.RetrieveDestroyAPIView):
     serializer_class = ProfileSerializer
     permission_classes=[IsAuthenticated, IsOnlyMyProfile]   
     def delete_profile(self, request, pk):
-        user = User.objects.filter(pk=pk)
-
-        user.delete()
+        profile = Profile.objects.filter(pk=pk)
+        profile.delete()
         response.data = {
             'message': 'Успешно'
         }

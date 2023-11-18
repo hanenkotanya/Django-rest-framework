@@ -2,6 +2,7 @@ from django.db import models
 from user.models import User
 
 
+
 class Personage(models.Model):
     creator = models.ForeignKey(User, on_delete= models.SET_NULL, null=True, blank=True, verbose_name='Создатель')
     name = models.CharField(max_length=100, blank=True, null=True, verbose_name='Имя')
@@ -11,9 +12,8 @@ class Personage(models.Model):
                               upload_to='personage_images', verbose_name='Фото')
     activity = models. BooleanField(default=True, verbose_name='Активность')
     life_size_puppet = models. BooleanField(default=False, verbose_name='Ростовая кукла')
-    animators_1_4_years = models. BooleanField(default=False, verbose_name='Аниматоры для 1-4 года')
-    animators_5_9_years = models. BooleanField(default=False, verbose_name='Аниматоры для 5-9 года')
-    animators_9_14_years = models. BooleanField(default=False, verbose_name='Аниматоры для 9-14 года')
+    
+
 
     def __str__(self):
         return str(self.name)
