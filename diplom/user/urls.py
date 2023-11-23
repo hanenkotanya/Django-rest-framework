@@ -1,5 +1,5 @@
-from django.urls import path
-from .views import RegisterView, LoginView, UserView, ProfileUpdate, ProfileView, ProfileDelete, LogoutView, ProfileUpdateForAnimatorsOrAdministrator
+from django.urls import path, re_path
+from .views import RegisterView, LoginView, UserView, AnimatorsListView, AnimatorsOneListView, PurchaseProfileForAdminOrAnimators,ProfileUpdate, ProfileView, ProfileDelete, LogoutView, ProfileUpdateForAnimatorsOrAdministrator
 from personage.views import PersonageLikeListView
 
 urlpatterns = [
@@ -12,5 +12,8 @@ urlpatterns = [
     path('my_profile_update_for_animators_or_administartor/<str:pk>/', ProfileUpdateForAnimatorsOrAdministrator.as_view()),
     path('my_profile_update/<str:pk>/', ProfileUpdate.as_view()),
     path('my_profile_delete/<str:pk>/', ProfileDelete.as_view()),
+    path('animators/', AnimatorsListView.as_view()),
+    path('animator_one/<str:pk>/', AnimatorsOneListView.as_view()),
+    re_path('^purchases/(?P<phone_number>.+)/$', PurchaseProfileForAdminOrAnimators.as_view()),
 
 ]

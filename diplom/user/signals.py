@@ -10,15 +10,16 @@ def createProfile(sender, instance, created, **kwargs):
         user = instance
         profile = Profile.objects.create(
             user=user,
-            name = user.username
+            full_name = user.username
 
         )
 
 def updateProfile(sender, instance, created, **kwargs):
-    user = instance.user
-    profile = Profile.objects.get(user=user)
-    user.username = profile.name 
-    user.save()
+
+        user = instance.user
+        profile = Profile.objects.get(user=user)
+        user.username = profile.full_name
+        user.save()
 
 
 def deleteUser(sender, instance, **kwargs):

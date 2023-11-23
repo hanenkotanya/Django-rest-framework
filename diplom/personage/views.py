@@ -1,8 +1,8 @@
 from django.contrib.auth import authenticate
-from .serializers import PersonageSerializer, PersonageUpdateSerializerForAdministrator, LikeSerializer
+from .serializers import PersonageSerializer, KomboSerializer, PersonageUpdateSerializerForAdministrator, LikeSerializer
 from rest_framework.exceptions import AuthenticationFailed
 from user.models import User, Profile
-from .models import Personage
+from .models import Personage, Kombo
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from drf_spectacular.utils import extend_schema
@@ -70,7 +70,7 @@ class PersonageOneUpdateView(generics.RetrieveUpdateAPIView):
         serializer.save()
         return Response (serializer.data)
 
-    
+
 
 class PersonageOneLikeView(generics.RetrieveUpdateAPIView):
     queryset = Personage.objects.all()
@@ -126,6 +126,21 @@ class PersonageDeleteView(generics.RetrieveDestroyAPIView):
         }
         return response
     
+
+class KomboListView(generics.ListAPIView):
+    queryset = Kombo.objects.filter(activity = True)
+    serializer_class = KomboSerializer
+    permission_classes = [AllowAny, ]
+    def get(self, request):
+        kombo = Kombo.objects.filter(activity = True)  
+        serializer = KomboSerializer(kombo, many=True)
+        return Response(serializer.data)
     
+
+class PurchaseList(generics.ListAPIView):
+    serializer_class = PersonageSerializer
+    def get_queryset(self):
+        name = self.kwargs['name']
+        return Personage.objects.filter(name=name)
 
 

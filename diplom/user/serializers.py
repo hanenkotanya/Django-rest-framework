@@ -46,7 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['id', 'user', 'image', 'role', 'intro', 'name', 'my_likes']
+        fields = ['id', 'user', 'image', 'role', 'intro', 'full_name', 'my_likes', 'phone_number']
 
 
 class ProfileLikeSerializer(serializers.ModelSerializer):
@@ -59,7 +59,7 @@ class ProfileUpdateSerializerForUser(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['id', 'user','image','name']
+        fields = ['id', 'user','image','full_name', 'phone_number']
         extra_kwargs = {
             'id': {'read_only': True},
             'user': {'read_only': True},
@@ -77,7 +77,7 @@ class ProfileUpdateSerializerForAnimators(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['id', 'user','image', 'name', 'intro']
+        fields = ['id', 'user','image', 'full_name', 'intro']
         extra_kwargs = {
             'id': {'read_only': True},
             'user': {'read_only': True},

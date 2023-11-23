@@ -134,3 +134,29 @@ class ProfileDelete(generics.RetrieveDestroyAPIView):
         return response
     
 
+class AnimatorsListView(generics.ListAPIView):
+    queryset = Profile.objects.filter(role = 'Аниматор')
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated, ]
+    def get(self, request):
+        kombo = Profile.objects.filter(role = 'Аниматор') 
+        serializer = ProfileSerializer(kombo, many=True)
+        return Response(serializer.data)
+    
+
+class AnimatorsOneListView(generics.RetrieveAPIView):
+    queryset = Profile.objects.filter(role = 'Аниматор')
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated, ]
+    def get(self, request, pk):
+        kombo = Profile.objects.filter(pk=pk)
+        serializer = ProfileSerializer(kombo, many=True)
+        return Response(serializer.data)
+    
+class PurchaseProfileForAdminOrAnimators(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsOnlyAdministratorOrAnimators, ] 
+    def get_queryset(self):
+        phone_number = self.kwargs['phone_number']
+        return Profile.objects.filter(phone_number=phone_number)
+

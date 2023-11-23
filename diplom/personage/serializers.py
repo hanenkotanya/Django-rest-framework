@@ -1,7 +1,9 @@
 from rest_framework import serializers
-from .models import Personage
+from .models import Personage, Kombo
 from user.models import Profile
 from rest_framework.exceptions import ValidationError
+
+
 
 class PersonageSerializer(serializers.ModelSerializer):
     creator = serializers.ReadOnlyField(source='creator.email')
@@ -13,8 +15,14 @@ class PersonageSerializer(serializers.ModelSerializer):
             'creator': {'read_only': True},
             'activity': {'read_only': True},
             'life_size_puppet' : {'read_only': True},
-
         }
+
+
+class KomboSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Kombo
+        fields = ['personage1', 'personage2', 'name', 'description', 'image', 'activity', 'life_size_puppet', ]
+
 
 
 class PersonageUpdateSerializerForAdministrator(serializers.ModelSerializer):

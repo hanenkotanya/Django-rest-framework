@@ -819,3 +819,97 @@ user.urls.py
     ] 
 
 Провели миграции
+
+
+В personage.models создали новую модель
+
+    class Kombo(models.Model):
+        personage1=models.ManyToManyField('personage.Personage', related_name ='personagekombo1', blank=True, verbose_name='Первый персонаж')
+        personage2=models.ManyToManyField('personage.Personage', related_name ='personagekombo2', blank=True, verbose_name='Второй персонаж')
+        name = models.CharField(max_length=100, blank=True, null=True, verbose_name='Имя')
+        description = models.CharField(max_length=5000, blank=True, null=True, verbose_name='Описание')
+        image = models.ImageField(blank=True, null=True,
+                              default='personage_images/default.jpg',
+                              upload_to='personage_images', verbose_name='Фото')
+        activity = models. BooleanField(default=True, verbose_name='Активность')
+        life_size_puppet = models. BooleanField(default=False, verbose_name='Ростовая кукла')
+
+        def __str__(self):
+            return str(self.name)
+
+        def has_perm(self, perm, obj=None):
+            return True
+
+        def has_module_perms(self, app_label):
+            return True
+
+
+Провели миграции
+
+В personage.views.py добавили функции для просмотра комбо персонажей
+
+    class KomboListView(generics.ListAPIView):
+        queryset = Kombo.objects.filter(activity = True)
+        serializer_class = KomboSerializer
+        permission_classes = [AllowAny, ]
+        def get(self, request):
+            kombo = Kombo.objects.filter(activity = True)  
+            serializer = KomboSerializer(kombo, many=True)
+            return Response(serializer.data)
+
+
+
+В personage.urls.py импортировали это представление и добавили путь
+    
+    path('kombo_list/', KomboListView.as_view()),
+
+
+Терминал
+
+    pip install django-filter 23.4
+    drf-url-filters 0.5.1
+
+
+В settings.py проекта
+
+    'django_filters',
+    'filters',
+
+В personage.views.py добавили представление для поиска персонажей по имени
+
+    class PurchaseList(generics.ListAPIView):
+        serializer_class = PersonageSerializer
+        def get_queryset(self):
+            name = self.kwargs['name']
+            return Personage.objects.filter(name=name)
+
+В personage.urls.py импортировали это представление и добавили путь
+
+    re_path('^purchases/(?P<name>.+)/$', PurchaseList.as_view()),
+
+В user.views.py добавили представление для показа Аниматоров и страничку одного аниматора
+
+    class AnimatorsListView(generics.ListAPIView):
+        queryset = Profile.objects.filter(role = 'Аниматор')
+        serializer_class = ProfileSerializer
+        permission_classes = [IsAuthenticated, ]
+        def get(self, request):
+            kombo = Profile.objects.filter(role = 'Аниматор') 
+            serializer = ProfileSerializer(kombo, many=True)
+            return Response(serializer.data)
+
+    class AnimatorsOneListView(generics.RetrieveAPIView):
+        queryset = Profile.objects.filter(role = 'Аниматор')
+        serializer_class = ProfileSerializer
+        permission_classes = [IsAuthenticated, ]
+        def get(self, request, pk):
+            kombo = Profile.objects.filter(pk=pk)
+            serializer = ProfileSerializer(kombo, many=True)
+            return Response(serializer.data)
+
+
+В user.urls.py проимпортировали это представления и добавили пути
+
+    path('animators/', AnimatorsListView.as_view()),
+    path('animator_one/<str:pk>/', AnimatorsOneListView.as_view()),
+    

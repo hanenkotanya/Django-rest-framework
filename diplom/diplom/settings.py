@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'personage',
     'age',
+    'django_filters',
+    'filters',
 ]
 
 MIDDLEWARE = [

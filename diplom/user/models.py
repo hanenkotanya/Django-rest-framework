@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.utils.text import slugify
 import uuid
+from django.core.validators import RegexValidator
 
 
 class User(AbstractUser):
@@ -32,7 +33,8 @@ class Profile(models.Model):
         ('Аниматор', 'Аниматор')
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50, blank=True, null=True)
+    full_name = models.CharField(max_length=50, blank=True, null=True)
+    phone_number = models.CharField(max_length=12, blank=True, null=True, validators=[RegexValidator(regex='^\+?7[-. ]?\d{5,12}$', message='Некорректный формат телефона')])
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='Пользователь')
     intro = models.CharField(max_length=500, blank=True, null=True, verbose_name='Описание')
     image = models.ImageField(blank=True, null=True,
