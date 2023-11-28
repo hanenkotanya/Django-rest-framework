@@ -90,3 +90,9 @@ class ProfileUpdateSerializerForAnimators(serializers.ModelSerializer):
         instance.save()
         return instance
     
+
+class AnimotorForUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['image', 'intro', 'full_name']
+    

@@ -1,15 +1,23 @@
-from django.contrib.auth import authenticate
-from .serializers import PersonageSerializer, KomboSerializer, PersonageUpdateSerializerForAdministrator, LikeSerializer
+from .serializers import (
+    PersonageSerializer, 
+    KomboSerializer, 
+    PersonageUpdateSerializerForAdministrator, 
+    LikeSerializer,
+    PersonageSearchSerializer, 
+    PersonageListSerializer,
+    PersonageOneListSerializer
+)
 from rest_framework.exceptions import AuthenticationFailed
-from user.models import User, Profile
+from user.models import Profile
 from .models import Personage, Kombo
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.response import Response
 from django.http import response
 from .permissions import IsOnlyAdministrator
-
+from django.db.models import Q
+from rest_framework.views import APIView
 
 
 class PersonageCreateView(generics.CreateAPIView):
@@ -19,9 +27,10 @@ class PersonageCreateView(generics.CreateAPIView):
     @extend_schema(
         request = PersonageSerializer,
         responses = {
-            "201": Personage,
-            "404": "Bad request"
-        }
+            201: PersonageSerializer,
+            400: {"default": "Bad request"}
+        },
+        description="Создание персонажа администратором" ,
     )
     def perform_create(self, serializer):
         profile = Profile.objects.get(user = self.request.user)
@@ -30,24 +39,40 @@ class PersonageCreateView(generics.CreateAPIView):
         else:
             raise AuthenticationFailed('Не прошедший проверку подлинности!')
 
-
+@extend_schema_view(
+    get=extend_schema(
+        responses={
+            201: PersonageListSerializer,
+            404: {"default": []},
+        },
+        description="Перечень всех активных персонажей",
+    )
+)
 class PersonageListView(generics.ListAPIView):
     queryset = Personage.objects.filter(activity = True)
-    serializer_class = PersonageSerializer
+    serializer_class = PersonageListSerializer
     permission_classes = [AllowAny, ]
     def get(self, request):
         personage = Personage.objects.filter(activity = True)  
-        serializer = PersonageSerializer(personage, many=True)
+        serializer = PersonageListSerializer(personage, many=True)
         return Response(serializer.data)
     
 
 class PersonageOneListView(generics.RetrieveAPIView):
     queryset = Personage.objects.all()
-    serializer_class = PersonageSerializer
+    serializer_class = PersonageOneListSerializer
     permission_classes = [AllowAny, ]
+    @extend_schema(
+        responses = {
+            200: PersonageOneListSerializer,
+            404: {"default": []},
+            400: {"default": "Bad request"},
+        },
+        description="Страница одного персонажа", 
+    )
     def get(self, request, pk):
         personage = Personage.objects.filter(pk=pk, activity = True)
-        serializer = PersonageSerializer(personage, many=True)
+        serializer = PersonageOneListSerializer(personage, many=True)
         return Response(serializer.data)
         
 
@@ -58,9 +83,11 @@ class PersonageOneUpdateView(generics.RetrieveUpdateAPIView):
     @extend_schema(
         request = PersonageUpdateSerializerForAdministrator,
         responses = {
-            "201": Personage,
-            "404": "Bad request"
-        }
+            201: PersonageUpdateSerializerForAdministrator,
+            400: {"default": "Bad request"},
+            404: {"default": "Not found."},
+        },
+        description="Изменение персонажа администратором", 
     )
     def update_personage(self, request, pk):
         personage = Personage.objects.filter(pk=pk) 
@@ -70,13 +97,33 @@ class PersonageOneUpdateView(generics.RetrieveUpdateAPIView):
         serializer.save()
         return Response (serializer.data)
 
+    @extend_schema(
+        request = PersonageUpdateSerializerForAdministrator,
+        responses = {
+            201: PersonageUpdateSerializerForAdministrator,
+            400: {"default": "Bad request"},
+            404: {"default": "Not found."},
+        },
+        description="Изменение персонажа администратором", 
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
 
 
-class PersonageOneLikeView(generics.RetrieveUpdateAPIView):
+
+class PersonageOneLikeView(generics.CreateAPIView):
     queryset = Personage.objects.all()
     serializer_class = LikeSerializer
     permission_classes = [IsAuthenticated, ]
-    def update(self, request, pk):
+    @extend_schema(
+        request = LikeSerializer,
+        responses = {
+            201: LikeSerializer,
+            400: {"default": "Bad request"}
+        },
+        description="Создание лайка персонажу пользователем", 
+    )
+    def post(self, request, pk):
         profile = request.user.profile
         personage = Personage.objects.get(pk=pk)
         profile.my_likes.add(personage.id)
@@ -87,11 +134,20 @@ class PersonageOneLikeView(generics.RetrieveUpdateAPIView):
         return Response (serializer.data)
     
 
-class PersonageOneLikeDeleteView(generics.RetrieveUpdateAPIView):
+class PersonageOneLikeDeleteView(generics.DestroyAPIView):
     queryset = Personage.objects.all()
     serializer_class = LikeSerializer
     permission_classes = [IsAuthenticated, ]
-    def update(self, request, pk):
+    @extend_schema(
+        request=LikeSerializer,
+        responses={
+            204: None,
+            400: {"default": "Bad request"},
+            404: {"default": "Not found."},
+        },
+        description="Удаление лайка",
+    ) 
+    def delete_like(self, request, pk):
         profile = request.user.profile
         personage = Personage.objects.get(pk=pk)
         profile.my_likes.remove(personage.id)
@@ -105,19 +161,35 @@ class PersonageOneLikeDeleteView(generics.RetrieveUpdateAPIView):
 
 class PersonageLikeListView(generics.ListAPIView):
     queryset = Personage.objects.filter(activity = True)
-    serializer_class = PersonageSerializer
+    serializer_class = LikeSerializer
     permission_classes = [IsAuthenticated, ]
+    @extend_schema(
+        responses = {
+            200: LikeSerializer,
+            404: {"default": "Bad request"}
+        },
+        description="Лайки активного в настоящий момент пользователя",
+    )
     def get(self, request):
         profile = request.user.profile
         my_likes =  profile.my_likes.filter(activity = True)
-        serializer = PersonageSerializer(my_likes, many=True)
+        serializer = LikeSerializer(my_likes, many=True)
         return Response(serializer.data)
     
     
-class PersonageDeleteView(generics.RetrieveDestroyAPIView):
+class PersonageDeleteView(generics.DestroyAPIView):
     queryset = Personage.objects.all() 
     serializer_class = PersonageSerializer
-    permission_classes=[IsAuthenticated, IsOnlyAdministrator]   
+    permission_classes=[IsAuthenticated, IsOnlyAdministrator]  
+    @extend_schema(
+        request=PersonageSerializer,
+        responses={
+            204: None,
+            400: {"default": "Bad request"},
+            404: {"default": "Not found."},
+        },
+        description="Удаление персонажем администратора",
+    )  
     def delete_personage(self, request, pk):
         personage = Personage.objects.filter(pk=pk)
         personage.delete()
@@ -131,16 +203,34 @@ class KomboListView(generics.ListAPIView):
     queryset = Kombo.objects.filter(activity = True)
     serializer_class = KomboSerializer
     permission_classes = [AllowAny, ]
+    @extend_schema(
+        responses = {
+            200: KomboSerializer,
+            404: {"default": "Bad request"}
+        },
+        description="Перечень комбо",
+    )
     def get(self, request):
         kombo = Kombo.objects.filter(activity = True)  
         serializer = KomboSerializer(kombo, many=True)
         return Response(serializer.data)
     
 
-class PurchaseList(generics.ListAPIView):
-    serializer_class = PersonageSerializer
-    def get_queryset(self):
-        name = self.kwargs['name']
-        return Personage.objects.filter(name=name)
 
+class PersonageSearchView(APIView):
+    @extend_schema(
+        request=PersonageSearchSerializer,
+        responses={
+            201: PersonageSearchSerializer,
+            400: {"default": []},
+        },
+        description="Поиск персонажа по search_query среди полей name/personage1/personage2. "
+        "Пример: ?search_query=Крош",
+    )
+    def get(self, request):
+        search_query = request.GET.get("search_query", "")
 
+        personages = Personage.objects.filter(name__icontains=search_query)
+
+        serializer = PersonageSearchSerializer(personages, many=True)
+        return Response(serializer.data)

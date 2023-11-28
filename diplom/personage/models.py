@@ -1,5 +1,5 @@
 from django.db import models
-from user.models import User
+from user.models import User, get_avatar_full_path, get_avatar_url
 
 
 
@@ -7,9 +7,7 @@ class Personage(models.Model):
     creator = models.ForeignKey(User, on_delete= models.SET_NULL, null=True, blank=True, verbose_name='Создатель')
     name = models.CharField(max_length=100, blank=True, null=True, verbose_name='Имя')
     description = models.CharField(max_length=5000, blank=True, null=True, verbose_name='Описание')
-    image = models.ImageField(blank=True, null=True,
-                              default='personage_images/default.jpg',
-                              upload_to='personage_images', verbose_name='Фото')
+    image = models.ImageField(upload_to=get_avatar_full_path, null=True, blank=True)
     activity = models. BooleanField(default=True, verbose_name='Активность')
     life_size_puppet = models. BooleanField(default=False, verbose_name='Ростовая кукла')
     
@@ -30,9 +28,7 @@ class Kombo(models.Model):
     personage2=models.ManyToManyField('personage.Personage', related_name ='personagekombo2', blank=True, verbose_name='Второй персонаж')
     name = models.CharField(max_length=100, blank=True, null=True, verbose_name='Имя')
     description = models.CharField(max_length=5000, blank=True, null=True, verbose_name='Описание')
-    image = models.ImageField(blank=True, null=True,
-                              default='personage_images/default.jpg',
-                              upload_to='personage_images', verbose_name='Фото')
+    image = models.ImageField(upload_to=get_avatar_full_path, null=True, blank=True)
     activity = models. BooleanField(default=True, verbose_name='Активность')
     life_size_puppet = models. BooleanField(default=False, verbose_name='Ростовая кукла')
     

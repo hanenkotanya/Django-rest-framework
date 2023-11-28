@@ -17,11 +17,32 @@ class PersonageSerializer(serializers.ModelSerializer):
             'life_size_puppet' : {'read_only': True},
         }
 
+class PersonageOneListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Personage
+        fields = ['name', 'description', 'image']
+        extra_kwargs = {
+            'name': {'read_only': True},
+            'description': {'read_only': True},
+            'image': {'read_only': True},
+        }
+
+
+class PersonageListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Personage
+        fields = ['name', 'image', 'id']
+        extra_kwargs = {
+            'name': {'read_only': True},
+            'image': {'read_only': True},
+        }
+ 
+
 
 class KomboSerializer(serializers.ModelSerializer):
     class Meta:
         model = Kombo
-        fields = ['personage1', 'personage2', 'name', 'description', 'image', 'activity', 'life_size_puppet', ]
+        fields = ['personage1', 'personage2', 'name', 'description', 'image']
 
 
 
@@ -49,3 +70,9 @@ class LikeSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'my_likes': {'read_only': True},
         }
+
+
+class PersonageSearchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Personage
+        fields = ['name', 'description', 'image', 'activity', 'life_size_puppet',]

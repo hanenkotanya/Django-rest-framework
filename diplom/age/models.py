@@ -14,7 +14,6 @@ class Age(models.Model):
 
     
     def __str__(self):
-        
         return str(self.age)
 
     def has_perm(self, perm, obj=None):
