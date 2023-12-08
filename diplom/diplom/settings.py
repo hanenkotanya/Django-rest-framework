@@ -159,28 +159,11 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
 }
 
-CORS_ORIGIN_WHITELIST = (
-    "http://localhost:3000",
-    "http://localhost:8000",
-    "http://0.0.0.0:8000",
-    "http://127.0.0.1:8000",
-    "http://*:8000",
-)
-
-# CORS
-CORS_ALLOW_ALL_ORIGINS = True
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-]
-
 # Настройки Celery
-CELERY_TIMEZONE = "UTC"
+
 CELERY_TASK_TRACK_STARTED = True
-CELERY_BROKER_URL = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -189,3 +172,11 @@ CELERY_RESULT_SERIALIZER = "json"
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 REDIS_DB = 0
+
+
+CACHES = {
+    'default': {
+        'BACKEND': "django.core.cache.backends.redis.RedisCache",
+        'LOCATION': 'redis://127.0.0.1:6379/',
+        }
+    }

@@ -22,7 +22,6 @@ class Personage(models.Model):
     def has_module_perms(self, app_label):
         return True
 
-
 class Kombo(models.Model):
     personage1=models.ManyToManyField('personage.Personage', related_name ='personagekombo1', blank=True, verbose_name='Первый персонаж')
     personage2=models.ManyToManyField('personage.Personage', related_name ='personagekombo2', blank=True, verbose_name='Второй персонаж')

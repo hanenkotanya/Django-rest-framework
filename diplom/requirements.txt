@@ -10,3 +10,4 @@ environ==1.0
 environs==9.5.0
 celery==5.3.6
 redis==5.0.1
+loadtest==0.0.2

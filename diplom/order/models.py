@@ -24,7 +24,6 @@ class Order(models.Model):
     data_time_order =models.DateTimeField(verbose_name='Дата и время заказа')
     sale = models.IntegerField(blank=True, null=True)
 
-
     def __str__(self):
         return str(f'Заказ пользователя {self.to_recipient_user}')
     
@@ -38,7 +37,6 @@ class Order(models.Model):
     def has_module_perms(self, app_label):
         return True
     
-
     def reject(self):
         self.delete()
 
@@ -76,3 +74,4 @@ class Tasks(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     def __str__(self):
         return f'{self.task_id}'
+    

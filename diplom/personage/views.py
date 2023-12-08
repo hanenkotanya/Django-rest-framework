@@ -19,6 +19,10 @@ from .permissions import IsOnlyAdministrator
 from django.db.models import Q
 from rest_framework.views import APIView
 
+from django.conf import settings 
+
+from django.conf import settings
+
 
 class PersonageCreateView(generics.CreateAPIView):
     queryset = Personage.objects.all()
@@ -56,7 +60,7 @@ class PersonageListView(generics.ListAPIView):
         personage = Personage.objects.filter(activity = True)  
         serializer = PersonageListSerializer(personage, many=True)
         return Response(serializer.data)
-    
+   
 
 class PersonageOneListView(generics.RetrieveAPIView):
     queryset = Personage.objects.all()
@@ -74,6 +78,7 @@ class PersonageOneListView(generics.RetrieveAPIView):
         personage = Personage.objects.filter(pk=pk, activity = True)
         serializer = PersonageOneListSerializer(personage, many=True)
         return Response(serializer.data)
+    
         
 
 class PersonageOneUpdateView(generics.RetrieveUpdateAPIView):

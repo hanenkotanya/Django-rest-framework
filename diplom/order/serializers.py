@@ -38,3 +38,8 @@ class NotificationSerializer(serializers.ModelSerializer):
             "created_at": {"read_only": True},
             "read": {"read_only": True},
         }
+
+class NotificationSerializeRead(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ("read", )
