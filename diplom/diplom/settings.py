@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'personage',
     'age',
     'order',
+    'price',
 ]
 
 MIDDLEWARE = [

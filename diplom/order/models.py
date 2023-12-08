@@ -1,6 +1,7 @@
 from django.db import models
-from user.models import User
+from user.models import User, Profile
 from personage.models import Personage, Kombo
+from price.models import Program
 from rest_framework.exceptions import ValidationError
 
 
@@ -23,6 +24,8 @@ class Order(models.Model):
     status = models.CharField(max_length=50, choices=ROLE_CHOICES, default='В ожидании')
     data_time_order =models.DateTimeField(verbose_name='Дата и время заказа')
     sale = models.IntegerField(blank=True, null=True)
+    price = models.CharField(max_length=50, blank=True, null=True)
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, blank=True, null=True, related_name = 'program',  verbose_name='Программа')
 
     def __str__(self):
         return str(f'Заказ пользователя {self.to_recipient_user}')
@@ -75,3 +78,18 @@ class Tasks(models.Model):
     def __str__(self):
         return f'{self.task_id}'
     
+
+class Order_a_call(Notification):
+    TIME_CHOICES = (
+        ('В течении получаса', 'В течении получаса'),
+        ('Через один час', 'Через один час'),
+        ('Через два часа', 'Через два часа'),
+    )
+
+    from_creator_user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="get_order_a_call"
+    )  # отправитель зaказа на звонок
+    phone_number = models.CharField(max_length=12, blank=True, null=True)
+    time_to_call = models.CharField(max_length=50, choices=TIME_CHOICES, 
+                                   default='В течении получаса',  verbose_name = "Желаемое время звонка")
+    info_for_users = models.CharField(max_length=50, default='Администратор может вам набрать с 9.00 да 18.00')

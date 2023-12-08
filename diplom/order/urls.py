@@ -9,10 +9,18 @@ from . views import (
     UpdateStatusOrder,
     MyNotificationNoReadList,
     OneNotificationNoReadList,
+    Order_a_callCreateView,
+    Order_a_callActivityList,
+    OneOrder_a_callNoReadList
+
+    
 )
 
 urlpatterns = [
     path('create_order/', OrderCreateView.as_view(), name='create_order'),
+    path('create_order_a_call/', Order_a_callCreateView.as_view(), name='create_order_a_call'),
+    path('my_orders_a_call_activity/', Order_a_callActivityList.as_view(), name='my_orders_a_call_activity'),
+    path('one_order_a_call/<int:pk>/', OneOrder_a_callNoReadList.as_view(), name='create_order_a_call'),
     path("notifications/", MyNotificationNoReadList.as_view(), name="notification_list"),
     path("notification/<int:pk>/", OneNotificationNoReadList.as_view(), name="notification"),
     path("my_orders_activity/", OrdersActivityList.as_view(), name="order_list"),
