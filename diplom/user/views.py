@@ -12,7 +12,7 @@ from .serializers import (
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
 from .models import User, Profile, get_avatar_full_path, get_avatar_url
-from rest_framework import generics, permissions, status, mixins
+from rest_framework import generics, permissions, status
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from django.contrib.auth import authenticate, login, logout
@@ -109,7 +109,7 @@ class UserView(generics.ListAPIView):
         return Response(serializer.data)
     
 
-class ProfileView(generics.ListAPIView):    #профиль активного юзера
+class ProfileView(generics.ListAPIView):    
     permission_classes=[IsAuthenticated,]
     @extend_schema(
         responses = {
@@ -125,7 +125,7 @@ class ProfileView(generics.ListAPIView):    #профиль активного �
         return Response(serializer.data)
 
     
-class ProfileUpdate(generics.UpdateAPIView):    #функция для изменения данных профиля и юзера 
+class ProfileUpdate(generics.UpdateAPIView):    
     queryset = Profile.objects.all()                           
     serializer_class = ProfileUpdateSerializerForUser
     permission_classes=[IsAuthenticated,IsOnlyMyProfile]
@@ -155,7 +155,8 @@ class ProfileUpdate(generics.UpdateAPIView):    #функция для изме�
     ) 
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
-    
+
+
 class ProfileUpdateForAnimatorsOrAdministrator(generics.UpdateAPIView):    
     queryset = Profile.objects.all()                           
     serializer_class = ProfileUpdateSerializerForAnimators
@@ -188,7 +189,7 @@ class ProfileUpdateForAnimatorsOrAdministrator(generics.UpdateAPIView):
     
 
 
-class ProfileDelete(mixins.DestroyModelMixin, generics.GenericAPIView): 
+class ProfileDelete(generics.RetrieveDestroyAPIView): 
     queryset = Profile.objects.all()                           
     serializer_class = ProfileSerializer
     permission_classes=[IsAuthenticated, IsOnlyMyProfile]  
@@ -200,9 +201,14 @@ class ProfileDelete(mixins.DestroyModelMixin, generics.GenericAPIView):
             404: {"default": "Not found."},
         },
         description="Удаление профиля",
-    ) 
-    def delete(self, request, *args, **kwargs):
-        return super().delete(request, *args, **kwargs)
+    )   
+    def delete_profile(self, request, pk):
+        profile = Profile.objects.filter(pk=pk)
+        profile.delete()
+        response.data = {
+            'message': 'Успешно'
+        }
+        return response
 
 
 
@@ -218,8 +224,8 @@ class AnimatorsListView(generics.ListAPIView):
         description="Перечень страниц аниматоров",
     )
     def get(self, request):
-        kombo = Profile.objects.filter(role = 'Аниматор') 
-        serializer = ProfileSerializer(kombo, many=True)
+        animators = Profile.objects.filter(role = 'Аниматор') 
+        serializer = ProfileSerializer(animators, many=True)
         return Response(serializer.data)
     
     
@@ -254,13 +260,16 @@ class ProfileUserForAdminSearchView(APIView):
         "Пример: ?search_query=Olya",
     )
     def get(self, request):
-        search_query = request.GET.get("search_query", "")
-
-        profiles = Profile.objects.filter(
-            Q(full_name__icontains=search_query)
-            | Q(phone_number__icontains=search_query)
-        )
-        serializer = ProfileSerializer (profiles, many=True)
-        return Response(serializer.data)
+        profile = Profile.objects.get(user = self.request.user)
+        if profile.role == "Администратор":
+            search_query = request.GET.get("search_query", "")
+            profiles = Profile.objects.filter(
+                Q(full_name__icontains=search_query)
+                | Q(phone_number__icontains=search_query)
+            )
+            serializer = ProfileSerializer (profiles, many=True)
+            return Response(serializer.data)
+        else:
+            raise AuthenticationFailed('Не прошедший проверку подлинности!')
 
 

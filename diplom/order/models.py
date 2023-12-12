@@ -14,8 +14,12 @@ class Order(models.Model):
     )
     from_creator_administrator = models.ForeignKey(User, on_delete= models.SET_NULL, null=True, related_name = 'orders', verbose_name='Создатель')
     to_recipient_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name = 'user_orders',  verbose_name='Заказ пользователя')
-    to_recipient_animators = models.ForeignKey(User, on_delete=models.CASCADE, related_name = 'animator_orders', verbose_name='Заказ на аниматора')
+    to_recipient_animators = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name = 'animator_orders', verbose_name='Заказ на аниматора')
+    to_recipient_two_animators = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name = 'animator_two_orders', verbose_name='Заказ на второго аниматора')
+    to_recipient_three_animators = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name = 'animator_three_orders', verbose_name='Заказ на третьего аниматора')
     personage = models.ForeignKey(Personage, blank=True, null=True, on_delete=models.CASCADE, related_name = 'orders', verbose_name='Персонаж')
+    personage_two = models.ForeignKey(Personage, blank=True, null=True, on_delete=models.CASCADE, related_name = 'orders_for_two', verbose_name='Второй персонаж')
+    personage_three = models.ForeignKey(Personage, blank=True, null=True, on_delete=models.CASCADE, related_name = 'orders_for_three', verbose_name='Третий персонаж')
     kombo = models.ForeignKey(Kombo, blank=True, null=True, on_delete=models.CASCADE, related_name = 'orders', verbose_name='Комбо')
     notes = models.CharField(max_length=5000, blank=True, null=True, verbose_name='Примечания')
     created_at = models.DateField(auto_now_add=True, verbose_name='Дата создания')
@@ -40,14 +44,6 @@ class Order(models.Model):
     def has_module_perms(self, app_label):
         return True
     
-    def reject(self):
-        self.delete()
-
-    def accept(self):
-        self.from_creator_administrator.profile.orders.add(self.order)
-        self.to_recipient_user.profile.orders.add(self.order)
-        self.to_recipient_animators.profile.orders.add(self.order)
-        self.delete()
 
     class Meta:
         ordering = ("-created_at",)

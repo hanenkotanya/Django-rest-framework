@@ -43,7 +43,12 @@ class OrderCreateView(generics.CreateAPIView):
             message = f"Вам пришел заказ от {self.request.user.username}."
             Notification.objects.create(recipient=order_request.to_recipient_user, message=message)
             Notification.objects.create(recipient=order_request.to_recipient_animators, message=message)
+            if order_request.to_recipient_two_animators:
+                Notification.objects.create(recipient=order_request.to_recipient_two_animators, message=message)   
+            if order_request.to_recipient_three_animators:
+                Notification.objects.create(recipient=order_request.to_recipient_three_animators, message=message)       
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         else:
             raise AuthenticationFailed('Не прошедший проверку подлинности!')
         
@@ -61,6 +66,8 @@ class OrdersActivityList(generics.ListAPIView):
         Q(activity = True)
         & (Q(to_recipient_user=self.request.user)
         | Q(to_recipient_animators=self.request.user))
+        | Q(to_recipient_two_animators=self.request.user)
+        | Q(to_recipient_three_animators=self.request.user)
         )
         return orders
     
@@ -72,10 +79,12 @@ class OrderOneList(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, pk):
         order = Order.objects.filter(
-            Q(pk=pk)
-            & (Q(to_recipient_user=self.request.user)
-            | Q(to_recipient_animators=self.request.user))
-        )
+        Q(pk=pk)
+        & (Q(to_recipient_user=self.request.user)
+        | Q(to_recipient_animators=self.request.user))
+        | Q(to_recipient_two_animators=self.request.user)
+        | Q(to_recipient_three_animators=self.request.user)
+       )
         serializer = OrderSerializer(order, many=True)
         return Response(serializer.data)
 
@@ -94,7 +103,9 @@ class OrdersNotActivityList(generics.ListAPIView):
         Q(activity = False)
         & (Q(to_recipient_user=self.request.user)
         | Q(to_recipient_animators=self.request.user))
-        )
+        | Q(to_recipient_two_animators=self.request.user)
+        | Q(to_recipient_three_animators=self.request.user)
+       )
         return orders
 
 
@@ -103,11 +114,15 @@ class OrdersNotActivityList(generics.ListAPIView):
 class OrdersListForAdmin(generics.ListAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated, IsOnlyAdministrator]
+    permission_classes = [IsAuthenticated, ]
     pagination_class = PageNumberPagination
     def get_queryset(self):
-        orders = Order.objects.all()
-        return orders
+        profile = Profile.objects.get(user = self.request.user)
+        if profile.role == "Администратор":
+            orders = Order.objects.all()
+            return orders
+        else:
+            raise AuthenticationFailed('Не прошедший проверку подлинности!')
 
 
 class UpdateStatusOrder(generics.RetrieveUpdateAPIView):
@@ -204,10 +219,26 @@ class Order_a_callActivityList(generics.ListAPIView):
         & (Q(recipient=self.request.user)
         ))
         return orders_a_call
+    
+
+@extend_schema_view(get=extend_schema(
+    description="Все обработанные заказы звонка для Администратора"
+    ))
+class Order_a_callNoActivityList(generics.ListAPIView):
+    queryset = Order_a_call.objects.filter(read = True)
+    serializer_class = Order_a_callSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = PageNumberPagination
+    def get_queryset(self):
+        orders_a_call = Order_a_call.objects.filter(
+        Q(read = True)
+        & (Q(recipient=self.request.user)
+        ))
+        return orders_a_call
 
 
 @extend_schema_view(get=extend_schema(description="Активный запрос на звонок для администратора"))
-class OneOrder_a_callNoReadList(generics.RetrieveUpdateDestroyAPIView):
+class OneOrder_a_callList(generics.RetrieveUpdateDestroyAPIView):
     queryset = Order_a_call.objects.all()
     serializer_class = NotificationSerializeRead
     permission_classes = [IsAuthenticated, ]

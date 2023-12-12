@@ -16,12 +16,9 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.response import Response
 from django.http import response
 from .permissions import IsOnlyAdministrator
-from django.db.models import Q
 from rest_framework.views import APIView
-
 from django.conf import settings 
 
-from django.conf import settings
 
 
 class PersonageCreateView(generics.CreateAPIView):
@@ -43,19 +40,19 @@ class PersonageCreateView(generics.CreateAPIView):
         else:
             raise AuthenticationFailed('Не прошедший проверку подлинности!')
 
-@extend_schema_view(
-    get=extend_schema(
-        responses={
-            201: PersonageListSerializer,
-            404: {"default": []},
-        },
-        description="Перечень всех активных персонажей",
-    )
-)
+
 class PersonageListView(generics.ListAPIView):
     queryset = Personage.objects.filter(activity = True)
     serializer_class = PersonageListSerializer
     permission_classes = [AllowAny, ]
+    @extend_schema(
+        responses = {
+            200: PersonageListSerializer,
+            404: {"default": []},
+            400: {"default": "Bad request"},
+        },
+        description="Перечень персонажей", 
+    )
     def get(self, request):
         personage = Personage.objects.filter(activity = True)  
         serializer = PersonageListSerializer(personage, many=True)
@@ -114,21 +111,12 @@ class PersonageOneUpdateView(generics.RetrieveUpdateAPIView):
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
 
-
-
-class PersonageOneLikeView(generics.CreateAPIView):
+@extend_schema_view(get=extend_schema(description="Лайкнуть персонажа")) 
+class PersonageOneLikeView(generics.RetrieveUpdateAPIView):
     queryset = Personage.objects.all()
     serializer_class = LikeSerializer
     permission_classes = [IsAuthenticated, ]
-    @extend_schema(
-        request = LikeSerializer,
-        responses = {
-            201: LikeSerializer,
-            400: {"default": "Bad request"}
-        },
-        description="Создание лайка персонажу пользователем", 
-    )
-    def post(self, request, pk):
+    def update(self, request, pk):
         profile = request.user.profile
         personage = Personage.objects.get(pk=pk)
         profile.my_likes.add(personage.id)
@@ -137,22 +125,14 @@ class PersonageOneLikeView(generics.CreateAPIView):
         serializer.is_valid(raise_exception =True)
         serializer.save()
         return Response (serializer.data)
-    
 
-class PersonageOneLikeDeleteView(generics.DestroyAPIView):
+
+@extend_schema_view(get=extend_schema(description="Убрать лайк персонажа"))     
+class PersonageOneLikeDeleteView(generics.RetrieveUpdateAPIView):
     queryset = Personage.objects.all()
     serializer_class = LikeSerializer
     permission_classes = [IsAuthenticated, ]
-    @extend_schema(
-        request=LikeSerializer,
-        responses={
-            204: None,
-            400: {"default": "Bad request"},
-            404: {"default": "Not found."},
-        },
-        description="Удаление лайка",
-    ) 
-    def delete_like(self, request, pk):
+    def update(self, request, pk):
         profile = request.user.profile
         personage = Personage.objects.get(pk=pk)
         profile.my_likes.remove(personage.id)
@@ -163,22 +143,15 @@ class PersonageOneLikeDeleteView(generics.DestroyAPIView):
         return Response (serializer.data)
 
 
-
+@extend_schema_view(get=extend_schema(description="Все лайки активного пользователя")) 
 class PersonageLikeListView(generics.ListAPIView):
     queryset = Personage.objects.filter(activity = True)
-    serializer_class = LikeSerializer
+    serializer_class = PersonageSerializer
     permission_classes = [IsAuthenticated, ]
-    @extend_schema(
-        responses = {
-            200: LikeSerializer,
-            404: {"default": "Bad request"}
-        },
-        description="Лайки активного в настоящий момент пользователя",
-    )
     def get(self, request):
         profile = request.user.profile
         my_likes =  profile.my_likes.filter(activity = True)
-        serializer = LikeSerializer(my_likes, many=True)
+        serializer = PersonageSerializer(my_likes, many=True)
         return Response(serializer.data)
     
     

@@ -10,22 +10,24 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'from_creator_administrator', 'to_recipient_user', 'to_recipient_animators', 
-                 'notes', 'activity', 'created_at', 'changes', 'data_time_order', 'personage', 
-                 'sale', 'price', 'kombo', 'program']
+        fields = ['id', 'from_creator_administrator', 'to_recipient_user', 'to_recipient_animators',
+                  'to_recipient_two_animators', 'to_recipient_three_animators','notes', 'activity', 
+                  'created_at', 'changes', 'data_time_order', 'personage', 'personage_two', 'personage_three',
+                  'sale', 'price', 'kombo', 'program', 'status']
         extra_kwargs = {
             'id': {'read_only': True},
             'from_creator_administrator': {'read_only': True},
             'activity': {'read_only': True},
             'created_at' : {'read_only': True},
             'changes' : {'read_only': True},
+            'status' : {'read_only': True},
         }
 
 
 class UpdateOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['status']
+        fields = ['status', 'activity']
 
 
 
@@ -48,12 +50,13 @@ class Order_a_callSerializer(NotificationSerializer):
     class Meta:
         model = Order_a_call
         fields = ("id", "from_creator_user","time_to_call", 
-                  "info_for_users", "recipient", "phone_number", "message")
+                  "info_for_users", "recipient", "phone_number", "message", "read")
         extra_kwargs = {
             "from_creator_user": {"read_only": True},
             "info_for_users": {"read_only": True},
             "recipient": {"read_only": True},
             "phone_number": {"read_only": True},
+            "read": {"read_only": True},
         }
 
 

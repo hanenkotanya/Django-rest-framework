@@ -15,7 +15,6 @@ def createProfile(sender, instance, created, **kwargs):
         )
 
 def updateProfile(sender, instance, created, **kwargs):
-
         user = instance.user
         profile = Profile.objects.get(user=user)
         user.username = profile.full_name

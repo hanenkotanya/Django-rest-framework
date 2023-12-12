@@ -24,6 +24,7 @@ class User(AbstractUser):
         if not self.slug:
             self.slug = self.generate_slug()
         super().save(*args,**kwargs)
+        
     
     objects = UserManager()
 

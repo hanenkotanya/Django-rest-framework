@@ -12,3 +12,4 @@ class IsOnlyAdministratorOrAnimators(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         profile = Profile.objects.get(user = request.user) 
         return profile.role == "Администратор" or profile.role == "Аниматор"
+
