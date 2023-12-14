@@ -216,8 +216,8 @@ class Order_a_callActivityList(generics.ListAPIView):
     def get_queryset(self):
         orders_a_call = Order_a_call.objects.filter(
         Q(read = False)
-        & (Q(recipient=self.request.user)
-        ))
+        & (Q(recipient=self.request.user))
+        )
         return orders_a_call
     
 

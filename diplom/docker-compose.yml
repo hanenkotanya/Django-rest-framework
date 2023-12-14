@@ -1,0 +1,42 @@
+version: '3.10'
+
+services:
+  web:
+    build: .
+    command: python /code/manage.py runserver 0.0.0.0:8080
+    volumes:
+      - .:/code
+    ports:
+      - 8080:8080
+    depends_on:
+      - redis
+      - celery
+    networks:
+      - app-network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  celery:
+    build: .
+    container_name: celery
+    environment:
+      - CELERY_BROKER_URL=redis
+    command: celery -A portfo worker --loglevel=INFO
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge
+   
+
+    

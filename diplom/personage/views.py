@@ -18,6 +18,7 @@ from django.http import response
 from .permissions import IsOnlyAdministrator
 from rest_framework.views import APIView
 from django.conf import settings 
+from django.db.models import Q
 
 
 
@@ -191,6 +192,26 @@ class KomboListView(generics.ListAPIView):
     def get(self, request):
         kombo = Kombo.objects.filter(activity = True)  
         serializer = KomboSerializer(kombo, many=True)
+        return Response(serializer.data)
+    
+
+class Life_size_puppetListView(generics.ListAPIView):
+    queryset = Personage.objects.filter(activity = True)
+    serializer_class = PersonageListSerializer
+    permission_classes = [AllowAny, ]
+    @extend_schema(
+        responses = {
+            200: KomboSerializer,
+            404: {"default": "Bad request"}
+        },
+        description="Перечень ростовых кукл",
+    )
+    def get(self, request):
+        life_size_puppet = Personage.objects.filter(
+        Q(activity = True)
+        & Q(life_size_puppet = True)
+        )
+        serializer = PersonageSerializer(life_size_puppet, many=True)
         return Response(serializer.data)
     
 
