@@ -93,6 +93,21 @@ class UserView(generics.ListAPIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+class UsersView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [
+        IsAuthenticated,
+    ]
+
+    @extend_schema(
+        responses={200: UserSerializer, 404: {"default": "Bad request"}},
+        description="Все юзеры",
+    )
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users)
+        return Response(serializer.data)
+
 
 class ProfileView(generics.ListAPIView):
     permission_classes = [
