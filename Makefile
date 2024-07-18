@@ -1,4 +1,4 @@
-PROJECT_NAME = testdjango
+PROJECT_NAME = testovoe
 MANAGE_PY = python manage.py
 
 lint:
